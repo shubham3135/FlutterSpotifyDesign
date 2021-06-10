@@ -1,7 +1,22 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-void main() {
-  runApp(MyApp());
+import 'package:desktop_window/desktop_window.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:spotify_design/data/data.dart';
+import 'package:spotify_design/models/current_track_model.dart';
+import 'package:spotify_design/screens/playlist_screen.dart';
+import 'package:spotify_design/widgets/current_track.dart';
+import 'package:spotify_design/widgets/side_menu.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  if (!kIsWeb && (Platform.isMacOS || Platform.isLinux || Platform.isWindows)) {
+    await DesktopWindow.setMinWindowSize(const Size(800, 600));
+  }
+  runApp(ChangeNotifierProvider(
+      create: (context) => CurrentTrackModel(), child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -10,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Spotify UI',
       debugShowCheckedModeBanner: false,
-      darkTheme: ThemeData(
+      theme: ThemeData(
         brightness: Brightness.dark,
         appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
         scaffoldBackgroundColor: const Color(0xFF121212),
@@ -43,7 +58,29 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      home: Scaffold(),
+      home: Shell(),
+    );
+  }
+}
+
+class Shell extends StatelessWidget {
+  const Shell({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+              child: Row(
+            children: [
+              if (MediaQuery.of(context).size.width > 800) SideMenu(),
+              Expanded(child: PlaylistScreen(playlist: lofihiphopPlaylist)),
+            ],
+          )),
+          CurrentTrack(),
+        ],
+      ),
     );
   }
 }
